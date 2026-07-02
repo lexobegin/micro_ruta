@@ -1,0 +1,16 @@
+{
+  "name": "MicroRuta",
+  "short_name": "MicroRuta",
+  "description": "Planificador de viajes en microbús para Santa Cruz",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2c3e50",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

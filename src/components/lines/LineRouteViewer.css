@@ -1,0 +1,118 @@
+.line-route-viewer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.viewer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.viewer-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.line-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.viewer-title h2 {
+  font-size: 20px;
+  color: #2c3e50;
+}
+
+.viewer-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.route-selector {
+  display: flex;
+  gap: 4px;
+  background: #f8f9fa;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.route-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+  background: transparent;
+  color: #7f8c8d;
+}
+
+.route-btn:hover {
+  background: #e9ecef;
+}
+
+.route-btn.active {
+  background: #3498db;
+  color: white;
+}
+
+.close-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: #f8f9fa;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background 0.2s;
+}
+
+.close-btn:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+.viewer-map {
+  flex: 1;
+  min-height: 300px;
+}
+
+.viewer-info {
+  padding: 12px 0;
+  border-top: 1px solid #eee;
+  margin-top: 12px;
+}
+
+.info-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-label {
+  display: block;
+  font-size: 12px;
+  color: #95a5a6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-top: 4px;
+}
