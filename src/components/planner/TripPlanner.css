@@ -58,6 +58,9 @@
   cursor: pointer;
   font-size: 18px;
   transition: all 0.2s;
+  font-size: 12px;
+  font-weight: 700;
+  color: #2c3e50;
 }
 
 .location-btn:hover {
@@ -70,6 +73,59 @@
   padding: 4px 8px;
   background: #e8f8f0;
   border-radius: 4px;
+}
+
+.selected-location.destination {
+  color: #c0392b;
+  background: #fdecea;
+}
+
+.map-select-btn {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px dashed #3498db;
+  border-radius: 6px;
+  background: #eef7ff;
+  color: #2474a6;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.map-select-btn:hover,
+.map-select-btn.active {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.stop-results {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  background: #fbfcfd;
+}
+
+.stop-result {
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 5px;
+  background: white;
+  color: #2c3e50;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.stop-result:hover {
+  background: #e8f4fd;
 }
 
 .plan-btn {

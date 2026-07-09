@@ -58,6 +58,7 @@
 
 .result-details {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   font-size: 13px;
   color: #7f8c8d;
@@ -88,15 +89,25 @@
 
 .step-preview {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   font-size: 13px;
   color: #555;
-  padding: 2px 0;
+  padding: 4px 0;
 }
 
 .step-icon {
-  font-size: 14px;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 22px;
+  border-radius: 50%;
+  background: #3498db;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .step-text {
@@ -107,4 +118,57 @@
   font-size: 12px;
   color: #95a5a6;
   padding: 2px 0 2px 24px;
+}
+
+.trip-info,
+.transfer-info {
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.trip-info h5,
+.transfer-info h5 {
+  margin: 0 0 8px;
+  color: #2c3e50;
+  font-size: 13px;
+}
+
+.trip-summary {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.trip-summary div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #f8f9fa;
+  font-size: 13px;
+}
+
+.trip-summary strong {
+  color: #2c3e50;
+}
+
+.trip-summary span {
+  color: #27ae60;
+  font-weight: 700;
+  text-align: right;
+}
+
+.trip-steps {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.transfer-info p {
+  margin: 4px 0;
+  color: #555;
+  font-size: 13px;
+  line-height: 1.4;
 }

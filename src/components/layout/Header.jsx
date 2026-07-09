@@ -35,6 +35,18 @@ const Header = () => {
           >
             Planificador
           </Link>
+          <Link
+            to="/figura-4"
+            className={`nav-link ${isActive('/figura-4') ? 'active' : ''}`}
+          >
+            Mapa
+          </Link>
+          <Link
+            to="/figura-3"
+            className={`nav-link ${location.pathname.startsWith('/figura-3') ? 'active' : ''}`}
+          >
+            Recorrido
+          </Link>
         </nav>
       </div>
     </header>

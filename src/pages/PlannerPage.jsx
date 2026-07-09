@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import TripPlanner from '../components/planner/TripPlanner';
 import RouteResults from '../components/planner/RouteResults';
 import MicroRutaMap from '../components/map/MicroRutaMap';
-import { calculateRoute, getNearbyStops } from '../api/endpoints';
-import LoadingSpinner from '../components/common/LoadingSpinner';
+import { calculateRoute, getNearbyStops, getPoints } from '../api/endpoints';
 import ErrorMessage from '../components/common/ErrorMessage';
 import './PlannerPage.css';
 
@@ -16,6 +15,32 @@ const PlannerPage = () => {
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [mapCenter, setMapCenter] = useState([-17.783, -63.182]);
   const [mapZoom, setMapZoom] = useState(13);
+  const [selectionMode, setSelectionMode] = useState(null);
+  const [stops, setStops] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadStops = async () => {
+      try {
+        const data = await getPoints(true, 1000);
+        if (!cancelled) setStops(data);
+      } catch (err) {
+        console.error('Error al cargar paradas:', err);
+        if (!cancelled) setError('No se pudieron cargar las paradas disponibles.');
+      }
+    };
+
+    loadStops();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const getRouteSteps = (route) => route?.pasos || route?.informacion_detallada || [];
+
+  const selectableStops = useMemo(() => stops, [stops]);
 
   const handlePlanTrip = async (originId, destinationId) => {
     try {
@@ -25,19 +50,11 @@ const PlannerPage = () => {
       setResults(data);
       if (data.length > 0) {
         setSelectedRoute(data[0]);
-        // Centrar el mapa en la ruta
-        if (data[0].pasos && data[0].pasos.length > 0) {
-          const midPoint = data[0].pasos[Math.floor(data[0].pasos.length / 2)];
-          if (midPoint && midPoint[0]) {
-            // Buscar el punto en informacion_detallada
-            const detail = data[0].informacion_detallada?.find(
-              p => p.punto_id === midPoint[0]
-            );
-            if (detail) {
-              setMapCenter([detail.latitud, detail.longitud]);
-              setMapZoom(14);
-            }
-          }
+        const steps = getRouteSteps(data[0]);
+        if (steps.length > 0) {
+          const midPoint = steps[Math.floor(steps.length / 2)];
+          setMapCenter([midPoint.latitud, midPoint.longitud]);
+          setMapZoom(14);
         }
       }
     } catch (err) {
@@ -50,19 +67,28 @@ const PlannerPage = () => {
 
   const handleSelectRoute = (route) => {
     setSelectedRoute(route);
-    // Centrar el mapa en la ruta seleccionada
-    if (route.pasos && route.pasos.length > 0) {
-      const midPoint = route.pasos[Math.floor(route.pasos.length / 2)];
-      if (midPoint && midPoint[0]) {
-        const detail = route.informacion_detallada?.find(
-          p => p.punto_id === midPoint[0]
-        );
-        if (detail) {
-          setMapCenter([detail.latitud, detail.longitud]);
-          setMapZoom(14);
-        }
-      }
+    const steps = getRouteSteps(route);
+    if (steps.length > 0) {
+      const midPoint = steps[Math.floor(steps.length / 2)];
+      setMapCenter([midPoint.latitud, midPoint.longitud]);
+      setMapZoom(14);
     }
+  };
+
+  const selectStop = (stop, type) => {
+    if (type === 'origin') {
+      setOrigin(stop);
+      setMapCenter([stop.latitud, stop.longitud]);
+    } else {
+      setDestination(stop);
+      setMapCenter([stop.latitud, stop.longitud]);
+    }
+
+    setMapZoom(15);
+    setResults([]);
+    setSelectedRoute(null);
+    setSelectionMode(null);
+    setError(null);
   };
 
   const handleLocationSelect = async (lat, lon, isOrigin) => {
@@ -71,24 +97,33 @@ const PlannerPage = () => {
       if (stops.length > 0) {
         const stop = stops[0];
         if (isOrigin) {
-          setOrigin(stop);
-          setMapCenter([stop.latitud, stop.longitud]);
+          selectStop(stop, 'origin');
         } else {
-          setDestination(stop);
+          selectStop(stop, 'destination');
         }
+      } else {
+        setError('No se encontraron paradas cercanas a esa ubicacion.');
       }
     } catch (err) {
+      setError('No se encontraron paradas cercanas a esa ubicacion.');
       console.error('Error al buscar paradas cercanas:', err);
     }
   };
 
+  const handleMapClick = (latlng) => {
+    if (!selectionMode) return;
+    handleLocationSelect(latlng.lat, latlng.lng, selectionMode === 'origin');
+    setSelectionMode(null);
+  };
+
   // Preparar rutas para el mapa
   const getMapRoutes = () => {
-    if (!selectedRoute || !selectedRoute.informacion_detallada) {
+    const steps = getRouteSteps(selectedRoute);
+    if (steps.length === 0) {
       return [];
     }
 
-    const points = selectedRoute.informacion_detallada.map(p => ({
+    const points = steps.map(p => ({
       lat: p.latitud,
       lon: p.longitud,
       stop: p.stop || false,
@@ -110,35 +145,19 @@ const PlannerPage = () => {
       points: points,
       weight: 6,
       opacity: 0.9,
-      showPoints: true,
+      showPoints: false,
       popup: true
     }];
   };
 
-  // Preparar paradas para el mapa
-  const getMapStops = () => {
-    if (!selectedRoute || !selectedRoute.informacion_detallada) {
-      return [];
-    }
-
-    return selectedRoute.informacion_detallada
-      .filter(p => p.stop)
-      .map(p => ({
-        id: p.punto_id,
-        latitud: p.latitud,
-        longitud: p.longitud,
-        descripcion: p.descripcion,
-        lineas: [p.nombre_linea].filter(Boolean)
-      }));
-  };
-
   // Preparar puntos de transbordo
   const getTransferPoints = () => {
-    if (!selectedRoute || !selectedRoute.informacion_detallada) {
+    const steps = getRouteSteps(selectedRoute);
+    if (steps.length === 0) {
       return [];
     }
 
-    return selectedRoute.informacion_detallada
+    return steps
       .filter(p => p.es_transferencia)
       .map(p => ({
         lat: p.latitud,
@@ -161,8 +180,12 @@ const PlannerPage = () => {
           <TripPlanner
             onPlanTrip={handlePlanTrip}
             onLocationSelect={handleLocationSelect}
+            onSelectStop={selectStop}
+            onSelectionModeChange={setSelectionMode}
             origin={origin}
             destination={destination}
+            selectionMode={selectionMode}
+            stops={selectableStops}
             loading={loading}
           />
 
@@ -183,7 +206,7 @@ const PlannerPage = () => {
             zoom={mapZoom}
             height="100%"
             routes={getMapRoutes()}
-            stops={getMapStops()}
+            stops={[]}
             startPoint={origin ? {
               lat: origin.latitud,
               lon: origin.longitud,
@@ -195,13 +218,13 @@ const PlannerPage = () => {
               descripcion: destination.descripcion
             } : null}
             transferPoints={getTransferPoints()}
-            selectedRoute={selectedRoute ? getMapRoutes()[0] : null}
-            showStops={true}
+            selectedRoute={null}
+            showStops={false}
             showLines={true}
-            showRoutePoints={true}
+            showRoutePoints={false}
             interactive={true}
             onMapClick={(latlng) => {
-              console.log('Map clicked:', latlng);
+              handleMapClick(latlng);
             }}
             onMoveEnd={(bounds) => {
               console.log('Map moved:', bounds);
